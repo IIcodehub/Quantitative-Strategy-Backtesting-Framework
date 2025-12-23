@@ -5,16 +5,17 @@ class Config:
     # ==========================
     # 1. 运行参数设置
     # ==========================
-    START_DATE = '20160108'
+    START_DATE = '20220101'
     END_DATE   = '20250218'
     STOCK_POOL = 'all'  
     RET_IDX    = 'open5twap'
-    SIGN       = 'Full_Test_Run_V1'
-    
+    SIGN       = 'allnewtest'
+    FORCE_RERUN = True
+
     # [新增] 额外因子文件列表
     # 如果有其他因子文件需要合并 (如 'Alpha191', 'Style_Factors' 等)，在此添加文件名(不含后缀)
     # 如果为空，则只读取默认的 Factors_ALL_all.parquet
-    ADDITIONAL_FACTORS = [] 
+    ADDITIONAL_FACTORS = ['Factors_alphafactor_all'] 
     # 示例: ADDITIONAL_FACTORS = ['StyleFactors_2023', 'HighFreqFactors']
 
     # 策略常量

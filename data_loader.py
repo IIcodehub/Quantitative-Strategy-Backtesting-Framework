@@ -89,13 +89,21 @@ class DataLoader:
             print(f"   + 合并额外因子: {factor_name}")
             try:
                 add_df = pd.read_parquet(str(file_path))
-                # 确保关联键类型一致 (虽然 read_parquet 通常自动处理，但为了保险)
                 if 'TradingDay' in add_df.columns:
                     add_df['TradingDay'] = pd.to_datetime(add_df['TradingDay'])
+
+             
+                if add_df.duplicated(subset=['TradingDay', 'SecuCode']).any():
+                    dup_count = add_df.duplicated(subset=['TradingDay', 'SecuCode']).sum()
+                    print(f"     [警告] 发现 {dup_count} 条重复数据，正在去重...")
+                    add_df = add_df.drop_duplicates(subset=['TradingDay', 'SecuCode'], keep='first')
                 
                 # 左连接合并
                 combined_df = pd.merge(combined_df, add_df, on=['TradingDay', 'SecuCode'], how='left')
+                
             except Exception as e:
                 print(f"错误: 合并因子文件 {factor_name} 失败: {e}")
                 
         return combined_df
+                
+    

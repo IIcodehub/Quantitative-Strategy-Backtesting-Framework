@@ -15,6 +15,7 @@ class BacktestRunner:
         print(f"\n{'='*40}")
         print(f"回测启动: {Config.SIGN}")
         print(f"配置哈希: {self.identifier}")
+        print(f"强制重跑: {Config.FORCE_RERUN}") # 提示当前状态
         print(f"股票池: {Config.STOCK_POOL} | 额外因子: {Config.ADDITIONAL_FACTORS}")
         print(f"{'='*40}\n")
 
@@ -43,12 +44,16 @@ class BacktestRunner:
             
             year_score = pd.DataFrame()
             
-            if cache_path.exists():
+            # [关键修改] 加入 FORCE_RERUN 判断
+            if not Config.FORCE_RERUN and cache_path.exists():
                 print(f"[{year}] 命中缓存: {cache_filename}")
                 year_score = pd.read_csv(str(cache_path))
                 year_score['TradingDay'] = pd.to_datetime(year_score['TradingDay'])
                 year_score['SecuCode'] = year_score['SecuCode'].apply(format_secucode)
             else:
+                if Config.FORCE_RERUN:
+                    print(f"[{year}] 强制重算 (忽略缓存)...")
+                
                 year_status = status_df[status_df['Year'] == year]
                 factor_df = self.loader.load_year_factors(year)
                 
@@ -59,12 +64,13 @@ class BacktestRunner:
                 print(f"[{year}] 合并基础数据...")
                 combined = pd.merge(year_status, factor_df, on=['TradingDay','SecuCode'], how='left')
                 
-                # 调用额外因子合并逻辑
-
+                # 调用额外因子合并
                 combined = self.loader.merge_additional_factors(combined, year)
                 
+                # 计算得分
                 year_score = FactorEngine.run_scoring_for_year(combined, year)
                 
+                # 写入缓存
                 if not year_score.empty:
                     print(f"[{year}] 写入缓存: {cache_filename}")
                     year_score.to_csv(str(cache_path), index=False, encoding='utf_8_sig')
@@ -80,7 +86,10 @@ class BacktestRunner:
         full_df = pd.concat(all_scores, ignore_index=True)
         full_df = pd.merge(full_df, returns_df, on=['TradingDay', 'SecuCode'], how='left')
         
+        # 组合构建
         port_df = PortfolioOptimizer.construct(full_df)
+        
+        # 绩效分析
         metrics = PerformanceAnalyzer.analyze(port_df)
         
         summary_file = Config.DIR_REPORTS / f"Summary_{Config.SIGN}.csv"

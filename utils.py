@@ -10,6 +10,8 @@ def get_config_identifier():
         f"ed:{Config.END_DATE}",
         f"pool:{Config.STOCK_POOL}",
         f"ret:{Config.RET_IDX}"
+        f"sign:{Config.SIGN}"
+        f"add:{Config.ADDITIONAL_FACTORS}"
     ]
     
     # [新增] 将额外因子列表加入哈希

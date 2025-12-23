@@ -22,26 +22,35 @@ class FactorEngine:
         # 提取因子变量 (根据你的策略需要添加)
         Alpha95 = get_vals('Alpha95')
         Alpha100 = get_vals('Alpha100')
+        corr_price_turn_1M = get_vals('corr_price_turn_1M')
+        corr_price_turn_6M = get_vals('corr_price_turn_6M')
+        corr_rety_turn_6M = get_vals('corr_rety_turn_6M')
+        liq_turn_std_6M = get_vals('liq_turn_std_6M')
+        corr_rety_turn_post_6M = get_vals('corr_rety_turn_post_6M')
+        mmt_range_M = get_vals('mmt_range_M')
+        mmt_normal_M = get_vals('mmt_normal_M')
         # E_Growth2 = get_vals('E_Growth2') # 示例
         
         # -----------------------------------------------------------
         # [策略逻辑区域] 修改此处公式
-        # 下面使用 HighERP LB800 的逻辑作为示例
         # -----------------------------------------------------------
         
         # 注意处理 NaN 值，如果因子有空值，比较运算可能会产生 False 或 Warning
-        # 这里假设数据质量尚可，直接运算
         
         # 示例逻辑：
-        # stock_pool = (
-        #     (1 * (Alpha95 <= mquantiles(Alpha95, 0.7))) +
-        #     (1 * (Alpha100 <= mquantiles(Alpha100, 0.7)))
-        # ) / 2
+        stock_pool = (
+            (1 * (Alpha95 <= mquantiles(Alpha95, 0.6))) 
+            + (1 * (Alpha100 <= mquantiles(Alpha100, 0.7)))
+            - (1 * (corr_price_turn_1M >= mquantiles(corr_price_turn_1M, 0.8)))
+            - (1 * (corr_rety_turn_6M >= mquantiles(corr_rety_turn_6M, 0.8)))
+            - (1 * (corr_rety_turn_post_6M >= mquantiles(corr_rety_turn_post_6M, 0.8)))
+            - (1 * (mmt_normal_M >= mquantiles(mmt_normal_M, 0.9)))
+        ) / 2
+
+      
         
-        score_component_1 = (1 * (Alpha95 <= mquantiles(Alpha95, 0.7)))
-        score_component_2 = (1 * (Alpha100 <= mquantiles(Alpha100, 0.7)))
         
-        final_score = (score_component_1 + score_component_2) / 2
+        final_score = stock_pool
         
         # -----------------------------------------------------------
         
