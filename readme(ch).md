@@ -1,4 +1,4 @@
-简体中文 | [English](./README.md)
+简体中文 | [English](./readme.md)
 # 📈 Quantitative Strategy Backtesting Framework V2.0
 
 量化多因子策略回测框架 V2.0
